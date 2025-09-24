@@ -12,7 +12,7 @@ public class LearningToCodeRobot extends OpMode {
 
     @Override
     public void init() {
-        telemetry.addData("Hello","World");
+        telemetry.addData("HELLO","I DID IT");
 
 
 
