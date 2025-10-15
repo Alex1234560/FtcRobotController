@@ -74,6 +74,10 @@ public class MechanumDriveComplete extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private DcMotor IntakeMotor = null;
 
+    private DcMotor ShooterMotor = null;
+
+    private DcMotor StopIntakeMotor = null;
+
     @Override
     public void runOpMode() {
 
@@ -84,6 +88,8 @@ public class MechanumDriveComplete extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right");
         IntakeMotor = hardwareMap.get(DcMotor.class, "intake");
+        ShooterMotor = hardwareMap.get(DcMotor.class, "Shooter");
+        StopIntakeMotor = hardwareMap.get(DcMotor.class, "StopIntake");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -112,7 +118,9 @@ public class MechanumDriveComplete extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double intake =  -gamepad1.right_trigger;
+            double StopIntake =  -gamepad2.right_trigger;
+            double intake =  gamepad2.right_stick_x;
+            double shooter =  -gamepad2.left_trigger;
             double axial   = gamepad1.left_stick_y;
             double lateral = -gamepad1.left_stick_x; // Note: pushing stick forward gives negative value
             double yaw     =  -gamepad1.right_stick_x;
@@ -127,6 +135,8 @@ public class MechanumDriveComplete extends LinearOpMode {
             double rightBackPower  = axial + lateral - yaw;
 
             IntakeMotor.setPower(intake);
+            ShooterMotor.setPower(shooter);
+            StopIntakeMotor.setPower(StopIntake);
 
 
             // Normalize the values so no wheel power exceeds 100%
