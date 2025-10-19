@@ -32,6 +32,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -77,19 +79,23 @@ public class MechanumDriveComplete extends LinearOpMode {
     private DcMotor ShooterMotor = null;
 
     private DcMotor StopIntakeMotor = null;
+    private Servo ShooterServo;
+
+    private int ShooterMotorState = 0;
 
     @Override
     public void runOpMode() {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "left");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "left");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right");
         IntakeMotor = hardwareMap.get(DcMotor.class, "intake");
         ShooterMotor = hardwareMap.get(DcMotor.class, "Shooter");
         StopIntakeMotor = hardwareMap.get(DcMotor.class, "StopIntake");
+        ShooterServo = hardwareMap.get(Servo.class, "ShooterServo");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -118,25 +124,47 @@ public class MechanumDriveComplete extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double StopIntake =  -gamepad2.right_trigger;
-            double intake =  gamepad2.right_stick_x;
-            double shooter =  -gamepad2.left_trigger;
-            double axial   = gamepad1.left_stick_y;
+            double StopIntake = -gamepad2.right_trigger;
+            double intake = gamepad2.left_stick_y;
+            //double shooter =  -gamepad2.left_trigger;
+            double axial = gamepad1.left_stick_y;
             double lateral = -gamepad1.left_stick_x; // Note: pushing stick forward gives negative value
-            double yaw     =  -gamepad1.right_stick_x;
+            double yaw = -gamepad1.right_stick_x;
             //double IntakeBinary = gamepad1.a;
             //double IntakeStatus = 0;
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
-            double leftFrontPower  = axial + lateral + yaw;
+            double leftFrontPower = axial + lateral + yaw;
             double rightFrontPower = axial - lateral - yaw;
-            double leftBackPower   = axial - lateral + yaw;
-            double rightBackPower  = axial + lateral - yaw;
+            double leftBackPower = axial - lateral + yaw;
+            double rightBackPower = axial + lateral - yaw;
 
             IntakeMotor.setPower(intake);
-            ShooterMotor.setPower(shooter);
+            //ShooterMotor.setPower(shooter);
             StopIntakeMotor.setPower(StopIntake);
+
+            //Below is motor code for the shooter motor, for gamepad
+
+
+            // The button was just pressed, so flip the state
+            if (gamepad2.a) {
+                ShooterMotor.setPower(-1);
+            } else {
+                ShooterMotor.setPower(0);
+            }
+
+
+        //Servo Motor Instructions below for gamepad
+            if (gamepad2.y) {
+            // move to 0 degrees.
+                ShooterServo.setPosition(0);
+            } else if (!gamepad2.y) {
+            // move to 180 degrees.
+                ShooterServo.setPosition(.35);
+            }
+
+
 
 
             // Normalize the values so no wheel power exceeds 100%
