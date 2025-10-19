@@ -75,13 +75,18 @@ public class MechanumDriveComplete extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private DcMotor IntakeMotor = null;
-
-    private DcMotor ShooterMotor = null;
-
     private DcMotor StopIntakeMotor = null;
     private Servo ShooterServo;
+    private DcMotor ShooterMotor = null;
 
-    private int ShooterMotorState = 0;
+
+    // --- Button Variables For Shooter ---
+    private boolean shooterMotorOn = false;      // Tracks if the motor should be on or off
+    private boolean wasXButtonPressed = false;   // Tracks the button's state from the last loop
+    // ------------
+
+
+
 
     @Override
     public void runOpMode() {
@@ -93,9 +98,11 @@ public class MechanumDriveComplete extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right");
         IntakeMotor = hardwareMap.get(DcMotor.class, "intake");
-        ShooterMotor = hardwareMap.get(DcMotor.class, "Shooter");
         StopIntakeMotor = hardwareMap.get(DcMotor.class, "StopIntake");
         ShooterServo = hardwareMap.get(Servo.class, "ShooterServo");
+        ShooterMotor = hardwareMap.get(DcMotor.class, "Shooter");
+
+
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -147,12 +154,28 @@ public class MechanumDriveComplete extends LinearOpMode {
             //Below is motor code for the shooter motor, for gamepad
 
 
-            // The button was just pressed, so flip the state
-            if (gamepad2.a) {
-                ShooterMotor.setPower(-1);
-            } else {
-                ShooterMotor.setPower(0);
+            //Binary Motor Logic For Shooter
+            // --- START: New Shooter Motor Toggle Logic ---
+
+            // 1. Get the current state of the 'x' button
+            boolean isXPressed = gamepad2.x;
+
+            // 2. Check if the button was JUST pressed (it was up, but is now down)
+            if (isXPressed && !wasXButtonPressed) {
+                // Flip the state: if it was on, turn it off; if it was off, turn it on.
+                shooterMotorOn = !shooterMotorOn;
             }
+            // 3. Update the tracking variable for the next loop
+            wasXButtonPressed = isXPressed;
+
+            // 4. Set the motor power based on the toggle state
+            if (shooterMotorOn) {
+                ShooterMotor.setPower(-1); // Motor is ON
+            } else {
+                ShooterMotor.setPower(0);  // Motor is OFF
+            }
+
+            // --- END: New Shooter Motor Toggle Logic ---
 
 
         //Servo Motor Instructions below for gamepad
@@ -161,7 +184,7 @@ public class MechanumDriveComplete extends LinearOpMode {
                 ShooterServo.setPosition(0);
             } else if (!gamepad2.y) {
             // move to 180 degrees.
-                ShooterServo.setPosition(.35);
+                ShooterServo.setPosition(.5);
             }
 
 
