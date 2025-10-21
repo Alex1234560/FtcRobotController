@@ -177,14 +177,26 @@ public class MechanumDriveComplete extends LinearOpMode {
 
             // --- END: New Shooter Motor Toggle Logic ---
 
+            // START cycling balls
+
+            if (gamepad2.b) {
+
+                ShooterMotor.setPower(-.55); // Motor is ON
+            }
+            else if (shooterMotorOn == false){
+                ShooterMotor.setPower(0);
+            }
+
+            //END cycling balls
+
 
         //Servo Motor Instructions below for gamepad
             if (gamepad2.y) {
-            // move to 0 degrees.
-                ShooterServo.setPosition(0);
+            // move to +45 degrees.
+                ShooterServo.setPosition(.45);
             } else if (!gamepad2.y) {
-            // move to 180 degrees.
-                ShooterServo.setPosition(.5);
+            // move to -45 degrees.
+                ShooterServo.setPosition(.25);
             }
 
 
