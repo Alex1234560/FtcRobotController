@@ -181,7 +181,7 @@ public class MechanumDriveComplete extends LinearOpMode {
 
             if (gamepad2.b) {
 
-                ShooterMotor.setPower(-.55); // Motor is ON
+                ShooterMotor.setPower(-.57); // Motor is ON
             }
             else if (shooterMotorOn == false){
                 ShooterMotor.setPower(0);
@@ -193,10 +193,10 @@ public class MechanumDriveComplete extends LinearOpMode {
         //Servo Motor Instructions below for gamepad
             if (gamepad2.y) {
             // move to +45 degrees.
-                ShooterServo.setPosition(.25);
+                ShooterServo.setPosition(0);
             } else if (!gamepad2.y) {
             // move to -45 degrees.
-                ShooterServo.setPosition(0);
+                ShooterServo.setPosition(.25);
             }
 
 
