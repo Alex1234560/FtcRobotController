@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -79,11 +80,14 @@ public class MechanumDriveComplete extends LinearOpMode {
     private Servo ShooterServo;
     private DcMotor ShooterMotor = null;
 
+    double ShooterMotorSpeed = 1;
+
 
     // --- Button Variables For Shooter ---
     private boolean shooterMotorOn = false;      // Tracks if the motor should be on or off
     private boolean wasXButtonPressed = false;   // Tracks the button's state from the last loop
     // ------------
+
 
 
 
@@ -97,7 +101,7 @@ public class MechanumDriveComplete extends LinearOpMode {
         leftBackDrive = hardwareMap.get(DcMotor.class, "left");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right");
-        IntakeMotor = hardwareMap.get(DcMotor.class, "intake");
+        IntakeMotor = hardwareMap.get(DcMotor.class, "INTAKE");
         StopIntakeMotor = hardwareMap.get(DcMotor.class, "StopIntake");
         ShooterServo = hardwareMap.get(Servo.class, "ShooterServo");
         ShooterMotor = hardwareMap.get(DcMotor.class, "Shooter");
@@ -114,9 +118,9 @@ public class MechanumDriveComplete extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
@@ -130,15 +134,20 @@ public class MechanumDriveComplete extends LinearOpMode {
         while (opModeIsActive()) {
             double max;
 
+
+            //Start of DriveSpeedCode
+
+            double DrivePower = .5;
+            if (gamepad1.right_trigger ==1){DrivePower = 1;}
+            // End of Drive Speed Code
+
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double StopIntake = -gamepad2.right_trigger;
             double intake = gamepad2.left_stick_y;
             //double shooter =  -gamepad2.left_trigger;
-            double axial = gamepad1.left_stick_y;
-            double lateral = -gamepad1.left_stick_x; // Note: pushing stick forward gives negative value
-            double yaw = -gamepad1.right_stick_x;
-            //double IntakeBinary = gamepad1.a;
-            //double IntakeStatus = 0;
+            double axial = -gamepad1.left_stick_y * DrivePower;
+            double lateral = gamepad1.left_stick_x * DrivePower; // Note: pushing stick forward gives negative value
+            double yaw = gamepad1.right_stick_x * DrivePower;
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -150,6 +159,8 @@ public class MechanumDriveComplete extends LinearOpMode {
             IntakeMotor.setPower(intake);
             //ShooterMotor.setPower(shooter);
             StopIntakeMotor.setPower(StopIntake);
+
+
 
             //Below is motor code for the shooter motor, for gamepad
 
@@ -168,35 +179,37 @@ public class MechanumDriveComplete extends LinearOpMode {
             // 3. Update the tracking variable for the next loop
             wasXButtonPressed = isXPressed;
 
+
+
+
+            if (ShooterMotorSpeed > 0 && gamepad2.dpad_down){
+                ShooterMotorSpeed -= .05;
+            }
+            else if (ShooterMotorSpeed < 1 && gamepad2.dpad_up){
+                ShooterMotorSpeed += .05;
+            }
+
             // 4. Set the motor power based on the toggle state
-            if (shooterMotorOn) {
-                ShooterMotor.setPower(-1); // Motor is ON
+
+            if (gamepad2.b) {
+                ShooterMotor.setPower(-.57); // Cycling Balls Mode
+            }
+            else if (shooterMotorOn) {
+                ShooterMotor.setPower(-ShooterMotorSpeed); // Motor is ON
             } else {
                 ShooterMotor.setPower(0);  // Motor is OFF
             }
 
             // --- END: New Shooter Motor Toggle Logic ---
 
-            // START cycling balls
-
-            if (gamepad2.b) {
-
-                ShooterMotor.setPower(-.57); // Motor is ON
-            }
-            else if (shooterMotorOn == false){
-                ShooterMotor.setPower(0);
-            }
-
-            //END cycling balls
-
 
         //Servo Motor Instructions below for gamepad
             if (gamepad2.y) {
-            // move to +45 degrees.
-                ShooterServo.setPosition(0);
+            // move to.40(180) degrees.
+                ShooterServo.setPosition(.30);
             } else if (!gamepad2.y) {
-            // move to -45 degrees.
-                ShooterServo.setPosition(.25);
+            // move to .55(180) degrees.
+                ShooterServo.setPosition(.57);
             }
 
 
@@ -232,6 +245,17 @@ public class MechanumDriveComplete extends LinearOpMode {
             rightBackPower  = gamepad1.b ? 1.0 : 0.0;  // B gamepad
             */
 
+            if (gamepad1.a) {
+                double force = .5;
+                leftFrontPower  = force;
+                rightFrontPower = force;
+                leftBackPower   = force;
+                rightBackPower  = force;
+
+                telemetry.addLine("CAL MODE: All wheels forced same power");
+                telemetry.addData("Force", force);
+            }
+
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
@@ -240,6 +264,8 @@ public class MechanumDriveComplete extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("ShooterPower= ", ShooterMotorSpeed);
+            telemetry.addData("DriveSpeed= ", DrivePower);
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.update();
