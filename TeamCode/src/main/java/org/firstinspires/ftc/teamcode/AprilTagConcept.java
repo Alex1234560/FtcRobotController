@@ -28,11 +28,17 @@
  */
 
 package org.firstinspires.ftc.robotcontroller.external.samples;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import android.util.Size;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -65,9 +71,18 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "Concept: AprilTag", group = "Concept")
+@Autonomous(name = "Concept: AprilTag", group = "Concept")
 
 public class AprilTagConcept extends LinearOpMode {
+
+    private DcMotor leftFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor rightBackDrive = null;
+    private DcMotor ShooterMotor = null;
+    private Servo ShooterServo;
+
+
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
@@ -81,8 +96,22 @@ public class AprilTagConcept extends LinearOpMode {
      */
     private VisionPortal visionPortal;
 
+    private ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void runOpMode() {
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "left");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "right");
+        ShooterMotor = hardwareMap.get(DcMotor.class, "Shooter");
+        ShooterServo = hardwareMap.get(Servo.class, "ShooterServo");
+
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+
 
         initAprilTag();
 
@@ -94,6 +123,103 @@ public class AprilTagConcept extends LinearOpMode {
 
         if (opModeIsActive()) {
             while (opModeIsActive()) {
+
+                double max;
+
+                double axial=0;
+                double lateral=0;
+                double yaw=0;
+
+                List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+
+                // Check if any tags are currently detected
+                if (currentDetections.size() > 0) {
+                    // A tag has been detected!
+
+                    // Step 1: Get the first detection from the list
+                    AprilTagDetection detection = currentDetections.get(0);
+
+                    // Step 2: Access the pose data from the detection
+                    // The ftcPose object contains position and orientation information.
+                    double range = detection.ftcPose.range;    // Distance from camera to tag in inches
+                    double bearing = detection.ftcPose.bearing;  // Angle from camera to tag in degrees
+                    double yawError = detection.ftcPose.yaw;     // Rotational error in degrees
+
+                    // Step 3: Display the data on the Driver Station
+                    telemetry.addData("Status", "Tag Detected!");
+                    telemetry.addData("Tag ID", detection.id);
+                    telemetry.addData("Range (Distance)", "%.1f inches", range);
+                    telemetry.addData("Bearing (Angle)", "%.1f degrees", bearing);
+                    telemetry.addData("Yaw Error", "%.1f degrees", yawError);
+
+                    // --- placeholder for movement logic ---
+                    // This is where you would add code to move toward the tag.
+                    // For now, we will just stop the robot.
+                    ShooterMotor.setPower(-.7);
+
+                    yaw = 0;
+
+                    if (Math.abs(bearing) > 7) {
+                        if (bearing < 7) {
+                            yaw = +.08;
+                        } else if (bearing > -7) {
+                            yaw = -.08;
+                        }
+                    }
+                    axial = 0;
+                    if (range >40){
+                    lateral = +.1;
+                    }
+
+                    if (Math.abs(bearing) < 7 && range <= 40)
+
+                        ShooterServo.setPosition(.30);
+
+
+
+
+
+
+
+
+
+                } else {
+                    // No tags are detected, so let's rotate the robot to search.
+                    telemetry.addData("Status", "No tags detected. Searching...");
+                    yaw = 0.1; // Rotate slowly.
+
+                    // Ensure the robot only spins
+                    axial = 0;
+                    lateral = 0;
+
+                    ShooterServo.setPosition(.57);
+                }
+
+
+
+
+                // Combine the joystick requests for each axis-motion to determine each wheel's power.
+                // Set up a variable for each drive wheel to save the power level for telemetry.
+                double leftFrontPower = axial + lateral + yaw;
+                double rightFrontPower = axial - lateral - yaw;
+                double leftBackPower = axial - lateral + yaw;
+                double rightBackPower = axial + lateral - yaw;
+
+                max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+                max = Math.max(max, Math.abs(leftBackPower));
+                max = Math.max(max, Math.abs(rightBackPower));
+
+                if (max > 1.0) {
+                    leftFrontPower  /= max;
+                    rightFrontPower /= max;
+                    leftBackPower   /= max;
+                    rightBackPower  /= max;
+                }
+
+                leftFrontDrive.setPower(leftFrontPower);
+                rightFrontDrive.setPower(rightFrontPower);
+                leftBackDrive.setPower(leftBackPower);
+                rightBackDrive.setPower(rightBackPower);
 
                 telemetryAprilTag();
 

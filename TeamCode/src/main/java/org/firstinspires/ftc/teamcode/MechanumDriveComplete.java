@@ -83,11 +83,17 @@ public class MechanumDriveComplete extends LinearOpMode {
     double ShooterMotorSpeed = 1;
 
 
+
+
     // --- Button Variables For Shooter ---
     private boolean shooterMotorOn = false;      // Tracks if the motor should be on or off
     private boolean wasXButtonPressed = false;   // Tracks the button's state from the last loop
     // ------------
 
+    // --- D-pad tracking ---
+    private boolean wasDpadUpPressed = false;
+    private boolean wasDpadDownPressed = false;
+// ----------------------------------------
 
 
 
@@ -138,11 +144,13 @@ public class MechanumDriveComplete extends LinearOpMode {
             //Start of DriveSpeedCode
 
             double DrivePower = .5;
-            if (gamepad1.right_trigger ==1){DrivePower = 1;}
+            //if (gamepad1.right_trigger ==1){DrivePower = 1;}
+            DrivePower += gamepad1.right_trigger/2;
             // End of Drive Speed Code
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double StopIntake = -gamepad2.right_trigger;
+
             double intake = gamepad2.left_stick_y;
             //double shooter =  -gamepad2.left_trigger;
             double axial = -gamepad1.left_stick_y * DrivePower;
@@ -181,18 +189,29 @@ public class MechanumDriveComplete extends LinearOpMode {
 
 
 
+            // SHOOTING VARIABLE MECHANICS START
+            boolean isDpadUpPressed = gamepad2.dpad_up;
+            boolean isDpadDownPressed = gamepad2.dpad_down;
 
-            if (ShooterMotorSpeed > 0 && gamepad2.dpad_down){
-                ShooterMotorSpeed -= .05;
+// Check if D-pad down was JUST pressed (rising edge detection)
+            if (isDpadDownPressed && !wasDpadDownPressed && ShooterMotorSpeed > 0) {
+                ShooterMotorSpeed -= 0.05;
             }
-            else if (ShooterMotorSpeed < 1 && gamepad2.dpad_up){
-                ShooterMotorSpeed += .05;
+// Check if D-pad up was JUST pressed
+            else if (isDpadUpPressed && !wasDpadUpPressed && ShooterMotorSpeed < 1) {
+                ShooterMotorSpeed += 0.05;
             }
+
+// VERY IMPORTANT: Update the tracking variables for the next loop cycle
+            wasDpadUpPressed = isDpadUpPressed;
+            wasDpadDownPressed = isDpadDownPressed;
+
+            // SHOOTING VARIABLE MECHANICS END
 
             // 4. Set the motor power based on the toggle state
 
             if (gamepad2.b) {
-                ShooterMotor.setPower(-.57); // Cycling Balls Mode
+                ShooterMotor.setPower(-.40); // Cycling Balls Mode
             }
             else if (shooterMotorOn) {
                 ShooterMotor.setPower(-ShooterMotorSpeed); // Motor is ON
@@ -244,7 +263,7 @@ public class MechanumDriveComplete extends LinearOpMode {
             rightFrontPower = gamepad1.y ? 1.0 : 0.0;  // Y gamepad
             rightBackPower  = gamepad1.b ? 1.0 : 0.0;  // B gamepad
             */
-
+            /*
             if (gamepad1.a) {
                 double force = .5;
                 leftFrontPower  = force;
@@ -254,7 +273,7 @@ public class MechanumDriveComplete extends LinearOpMode {
 
                 telemetry.addLine("CAL MODE: All wheels forced same power");
                 telemetry.addData("Force", force);
-            }
+            }*/
 
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
