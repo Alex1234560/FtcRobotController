@@ -126,12 +126,12 @@ public class WallAutoMountDoug extends OpMode {
                 BallsShot++;
             }
             // If we are in the "shooting" state, check if one second has passed
-            if (isShooting && shooterTimer.seconds() >= 1) {
+            if (isShooting && shooterTimer.seconds() >= .15) {
                 ShooterServo.setPosition(RobotConstants.SERVO_IDLE_POSITION); // Return servo to rest position
                 IntakeMotor.setPower(-.5);
-                StopIntakeMotor.setPower(-.6);
+                StopIntakeMotor.setPower(-1);
 
-                if (shooterTimer.seconds() >= 4) {
+                if (shooterTimer.seconds() >= 2) {
                     isShooting = false;
                     IntakeMotor.setPower(0);
                     StopIntakeMotor.setPower(0);

@@ -117,21 +117,21 @@ public class TeleOpOrganizedAndFieldCentered extends LinearOpMode {
     private void handleIntake() {
         // Determine which trigger has priority for intake power
         double controllingTrigger = Math.max(gamepad1.left_trigger, gamepad2.left_trigger);
+        double intakeVelocity = IntakeMotor.getVelocity(); // Ticks per second
 
-        double intakePower = 0;
-        if (gamepad2.left_bumper) { // Only run intake if the bumper is held
-            // Allow forward intake only if not at max velocity (simplified)
-            // Allow reverse intake always
-            if (IntakeMotor.getVelocity() >= 0) {
-                intakePower = controllingTrigger;
-            } else {
-                intakePower = -controllingTrigger;
-            }
+
+
+        double intake=0;
+        if ( intakeVelocity >= 0 && gamepad2.left_bumper){
+            intake = controllingTrigger;
+        }
+        else if (intakeVelocity <= 0){
+            intake = -controllingTrigger;
         }
 
         double stopIntakePower = -gamepad2.right_trigger;
 
-        IntakeMotor.setPower(intakePower);
+        IntakeMotor.setPower(intake);
         StopIntakeMotor.setPower(stopIntakePower);
     }
 
