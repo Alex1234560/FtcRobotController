@@ -29,16 +29,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.service.controls.Control;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.ServoController;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -70,10 +66,12 @@ import com.qualcomm.robotcore.hardware.ServoController;
 
 @TeleOp
 
-public class TeleOpForCompetition extends LinearOpMode {
+public class MountDougTeleOp extends LinearOpMode {
 
     // Setting up drivetrain file
     private Drive robotDrive;
+    private AprilTagVision vision;
+    private AimingController aimingController;
 
     //setting up motors and time
     private ElapsedTime runtime = new ElapsedTime();
@@ -82,7 +80,9 @@ public class TeleOpForCompetition extends LinearOpMode {
     private Servo ShooterServo;
     private DcMotorEx ShooterMotor = null;
 
-    double ShooterMotorSpeed = 1;
+    double ShooterMotorSpeed = .8;
+
+
 
 
 
@@ -104,6 +104,8 @@ public class TeleOpForCompetition extends LinearOpMode {
     public void runOpMode() {
         //Start a drive class to be able to use wheels
         robotDrive = new Drive(hardwareMap);
+        vision = new AprilTagVision(hardwareMap, "Webcam 1"); // Use your webcam's configured name
+        aimingController = new AimingController(vision, telemetry);
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -175,6 +177,40 @@ public class TeleOpForCompetition extends LinearOpMode {
             double yaw = gamepad1.right_stick_x;
 
             robotDrive.move(axial, lateral, yaw, speed);
+
+            //AUTO AIM CODE BELOW
+
+            /*if (gamepad1.a||gamepad1.right_bumper) {
+                // When 'A' is held, the AimingController takes over the drivetrain.
+
+                // Call the single function to get the calculated powers
+                double[] aimPowers = aimingController.calculateMovementPowers();
+
+                // Unpack the array for clarity
+                double axialPower = aimPowers[0];
+                double lateralPower = aimPowers[1];
+                double yawPower = aimPowers[2];
+                speed = aimPowers[3];
+                //ShooterMotorSpeed = aimPowers[4];
+
+                // Command the robot to move using the calculated powers.
+                // The robot will now automatically move to the target position.
+                robotDrive.move(axialPower, lateralPower, yawPower, speed);
+
+                telemetry.addData("Drive Mode", "AUTO-AIM ACTIVE");
+
+            } else {
+                // When 'A' is NOT held, use normal driver controls.
+
+
+                telemetry.addData("Drive Mode", "Manual");
+            } */
+
+            //AUTOAIM CODE ENDS
+
+
+
+
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -256,10 +292,10 @@ public class TeleOpForCompetition extends LinearOpMode {
 
 
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            //telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("ShooterPower= ", ShooterMotorSpeed);
             telemetry.addData("ShooterMotorTickPerSecond= ", shooterVelocity);
-            telemetry.addData("Intake speed =  ", intakeVelocity);
+            //telemetry.addData("Intake speed =  ", intakeVelocity);
 
             telemetry.update();
         }
