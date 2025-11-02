@@ -12,7 +12,7 @@ public class Drive {
     // 1. Declare Hardware
     // These are 'private' because only the Drive class should control them directly.
     private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
+    private DcMotor leftDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
 
@@ -23,16 +23,16 @@ public class Drive {
      */
     public Drive(HardwareMap hardwareMap) {
         // 2. Initialize Hardware from the hardware map
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        leftBackDrive   = hardwareMap.get(DcMotor.class, "left");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        rightBackDrive  = hardwareMap.get(DcMotor.class, "right");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "leftFront");
+        leftDrive   = hardwareMap.get(DcMotor.class, "leftBack");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFront");
+        rightBackDrive  = hardwareMap.get(DcMotor.class, "rightBack");
 
         // 3. Set Motor Directions
         // This configuration is for a standard mecanum drive.
         // You may need to adjust this based on your robot's build.
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
@@ -45,33 +45,33 @@ public class Drive {
      * It takes high-level movement commands (axial, lateral, yaw) and translates
      * them into power levels for each of the four motors.
      * @param axial   Forward/Backward power (-1.0 to 1.0)
-     * @param lateral Strafe Left/Right power (-1.0 to 1.0)
+     * @param lateral Strafe left/Right power (-1.0 to 1.0)
      * @param yaw     Turning power (-1.0 to 1.0)
      */
     public void move(double axial, double lateral, double yaw, double speed) {
         // Combine the movement requests to determine each wheel's power
         double leftFrontPower  = axial + lateral + yaw;
         double rightFrontPower = axial - lateral - yaw;
-        double leftBackPower   = axial - lateral + yaw;
+        double leftPower   = axial - lateral + yaw;
         double rightBackPower  = axial + lateral - yaw;
 
         // Normalize the values so no wheel power exceeds 100%
         // This is the same logic you had before, now inside a dedicated method.
         double max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
-        max = Math.max(max, Math.abs(leftBackPower));
+        max = Math.max(max, Math.abs(leftPower));
         max = Math.max(max, Math.abs(rightBackPower));
 
         if (max > 1.0) {
             leftFrontPower  /= max;
             rightFrontPower /= max;
-            leftBackPower   /= max;
+            leftPower   /= max;
             rightBackPower  /= max;
         }
 
         // Send the calculated power to the motors
         leftFrontDrive.setPower(leftFrontPower * speed);
         rightFrontDrive.setPower(rightFrontPower * speed);
-        leftBackDrive.setPower(leftBackPower * speed);
+        leftDrive.setPower(leftPower * speed);
         rightBackDrive.setPower(rightBackPower * speed);
     }
 
@@ -90,7 +90,7 @@ public class Drive {
         DcMotor.ZeroPowerBehavior behavior = enabled ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT;
         leftFrontDrive.setZeroPowerBehavior(behavior);
         rightFrontDrive.setZeroPowerBehavior(behavior);
-        leftBackDrive.setZeroPowerBehavior(behavior);
+        leftDrive.setZeroPowerBehavior(behavior);
         rightBackDrive.setZeroPowerBehavior(behavior);
     }
 }
