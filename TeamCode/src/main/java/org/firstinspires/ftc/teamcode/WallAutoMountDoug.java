@@ -78,7 +78,7 @@ public class WallAutoMountDoug extends OpMode {
         //GO SIDEWAYS FOR A SET AMOUNT OF TIME
         lateral = 0;
         if (autoTime < MovingBackTime) {
-            lateral = -1;
+            //lateral = -1; ADD THIS LINE BACK IN TO MAKE IT GO BACK
         }
 
         /*if (vision.isTagVisible()) {
@@ -128,10 +128,10 @@ public class WallAutoMountDoug extends OpMode {
             // If we are in the "shooting" state, check if one second has passed
             if (isShooting && shooterTimer.seconds() >= .15) {
                 ShooterServo.setPosition(RobotConstants.SERVO_IDLE_POSITION); // Return servo to rest position
-                IntakeMotor.setPower(-.5);
+                IntakeMotor.setPower(-.8);
                 StopIntakeMotor.setPower(-1);
 
-                if (shooterTimer.seconds() >= 2) {
+                if (shooterTimer.seconds() >= .5) {
                     isShooting = false;
                     IntakeMotor.setPower(0);
                     StopIntakeMotor.setPower(0);

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /**
@@ -12,7 +13,7 @@ public class Drive {
     // 1. Declare Hardware
     // These are 'private' because only the Drive class should control them directly.
     private DcMotor leftFrontDrive = null;
-    private DcMotor leftDrive = null;
+    private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
 
@@ -24,16 +25,16 @@ public class Drive {
     public Drive(HardwareMap hardwareMap) {
         // 2. Initialize Hardware from the hardware map
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "leftFront");
-        leftDrive   = hardwareMap.get(DcMotor.class, "leftBack");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "leftBack");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFront");
         rightBackDrive  = hardwareMap.get(DcMotor.class, "rightBack");
 
         // 3. Set Motor Directions
         // This configuration is for a standard mecanum drive.
         // You may need to adjust this based on your robot's build.
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Optional: Set brake behavior
@@ -71,8 +72,10 @@ public class Drive {
         // Send the calculated power to the motors
         leftFrontDrive.setPower(leftFrontPower * speed);
         rightFrontDrive.setPower(rightFrontPower * speed);
-        leftDrive.setPower(leftPower * speed);
+        leftBackDrive.setPower(leftPower * speed);
         rightBackDrive.setPower(rightBackPower * speed);
+
+
     }
 
     /**
@@ -90,7 +93,7 @@ public class Drive {
         DcMotor.ZeroPowerBehavior behavior = enabled ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT;
         leftFrontDrive.setZeroPowerBehavior(behavior);
         rightFrontDrive.setZeroPowerBehavior(behavior);
-        leftDrive.setZeroPowerBehavior(behavior);
+        leftBackDrive.setZeroPowerBehavior(behavior);
         rightBackDrive.setZeroPowerBehavior(behavior);
     }
 }
